@@ -10,6 +10,12 @@ router
     .post('/login', authController.login)
     .post('/forgotPassword', authController.forgotPassword)
     .patch('/resetPassword/:token', authController.resetPassword)
+    
+    
+router    
+    .patch('/updateMyPassword', authController.protect, authController.updatePassword)
+    .patch('/updateMe', authController.protect, userController.updateMe)
+    .delete('/deleteMe', authController.protect, userController.deleteMe)
 
 router
     .route('/')
