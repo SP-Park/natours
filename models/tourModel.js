@@ -1,6 +1,8 @@
-const mongoose = require('mongoose');
 const slugify = require('slugify');
+const mongoose = require('mongoose');
 const validator = require('validator');
+
+// const User = require('./userModel');
 
 const tourSchema = new mongoose.Schema({
     name: {
@@ -76,7 +78,38 @@ const tourSchema = new mongoose.Schema({
     secretTour: {
         type: Boolean,
         default: false
-    }
+    },
+    startLocation: {
+        // GeoJSON
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String
+    },
+    locations: [
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }
+    ],
+    guides: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
+
+    ]
 }, { // 가상 필드 사용을 위해 필요한 옵션
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -87,11 +120,24 @@ tourSchema.virtual('durationWeeks').get(function() {
     return this.duration / 7
 })
 
+// Virtual populate
+tourSchema.virtual('reviews', {
+    ref: 'Review', 
+    foreignField: 'tour', 
+    localField: '_id'    //id가 저장되는 곳
+})
+
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()
 tourSchema.pre('save', function(next) {
     this.slug = slugify(this.name, { lower: true })
     next()
 })
+
+// tourSchema.pre('save', async function(next) {
+//     this.guidesPromises = this.guides.map(async id => await User.findById(id))
+//     this.guides = await Promise.all(this.guidesPromises)
+//     next()
+// })
 
 // tourSchema.pre('save', function(next){
 //     console.log('Will save document...')
@@ -111,11 +157,21 @@ tourSchema.pre(/^find/, function(next){
     next()
 })
 
+tourSchema.pre(/^find/, function(next){
+    // this 는 언제나 현재의 쿼리를 가리킨다.
+    this.populate({
+        path: 'guides',
+        select: '-__v -passwordChangedAt'
+    })
+    next()
+})
+
 tourSchema.post(/^find/, function(docs, next) {
     console.log(`Query took ${Date.now() - this.start} milliseconds!`)
     console.log(docs)
     next()
 })
+
 
 // AGGREGATION MIDDLEWARE
 tourSchema.pre('aggregate', function(next){

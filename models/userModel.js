@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const validator = require('validator');
 
-
 const userSchema = new mongoose.Schema ({
     name: {
         type: String,
@@ -42,6 +41,11 @@ const userSchema = new mongoose.Schema ({
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    createdAt: {
+        type: Date,
+        default: Date.now(),
+        select: false  // 클라에 필드 정보를 보내지 않음
+    },
     active: {
         type: Boolean,
         default: true,
