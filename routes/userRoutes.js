@@ -13,6 +13,7 @@ router
     
     
 router    
+    .get('/me', authController.protect, userController.getMe, userController.getUser)
     .patch('/updateMyPassword', authController.protect, authController.updatePassword)
     .patch('/updateMe', authController.protect, userController.updateMe)
     .delete('/deleteMe', authController.protect, userController.deleteMe)
