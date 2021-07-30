@@ -35,7 +35,8 @@ const tourSchema = new mongoose.Schema({
         type: Number,
         default: 4.5,
         min: [1, 'Rating must be above 1.0'],
-        max: [5, 'Rating must be below 5.0']
+        max: [5, 'Rating must be below 5.0'],
+        set: val => Math.round(val * 10) / 10 //4.66666, 4.7
     },
     ratingsQuantity: {
         type: Number,
@@ -118,6 +119,7 @@ const tourSchema = new mongoose.Schema({
 // tourSchema.index({ price: 1 })   // index를 사용하여 검색 (읽기 속도 향상) 1 내림차순, -1 오름차순 정렬
 // tourSchema.index({ price: 1 , ratingsAverage: -1 }) 
 // tourSchema.index({ slug: 1 })
+tourSchema.index({ startLocation: '2dsphere' })
 
 // 가성 필드 정의 
 tourSchema.virtual('durationWeeks').get(function() {
@@ -178,11 +180,11 @@ tourSchema.post(/^find/, function(docs, next) {
 
 
 // AGGREGATION MIDDLEWARE
-tourSchema.pre('aggregate', function(next){
-    this.pipeline().unshift({ $match: { secretTour: { $ne: true }}})
-    console.log(this.pipeline())
-    next()
-})
+// tourSchema.pre('aggregate', function(next){
+//     this.pipeline().unshift({ $match: { secretTour: { $ne: true }}})
+//     console.log(this.pipeline())
+//     next()
+// })
 
 const Tour = mongoose.model('Tour', tourSchema)
 
