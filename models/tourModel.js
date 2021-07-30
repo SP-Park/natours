@@ -115,6 +115,10 @@ const tourSchema = new mongoose.Schema({
     toObject: { virtuals: true },
 })
 
+// tourSchema.index({ price: 1 })   // index를 사용하여 검색 (읽기 속도 향상) 1 내림차순, -1 오름차순 정렬
+// tourSchema.index({ price: 1 , ratingsAverage: -1 }) 
+// tourSchema.index({ slug: 1 })
+
 // 가성 필드 정의 
 tourSchema.virtual('durationWeeks').get(function() {
     return this.duration / 7
