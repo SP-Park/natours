@@ -1,4 +1,5 @@
 const hpp = require('hpp');
+const path = require('path');
 const xss = require('xss-clean');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -9,12 +10,21 @@ const mongoSanitize = require('express-mongo-sanitize');
 const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express()
 
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'))
+
+
+
 // 1. GLOBAL MIDDELWARE
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public')))
 
 // Set security HTTP headers
 app.use(helmet())
@@ -54,8 +64,7 @@ app.use(hpp({
     ]
 }))
 
-// Serving static files
-app.use(express.static(`${__dirname}/public`))
+
 
 // Test middleware 
 app.use((req, res, next) => {
@@ -69,6 +78,7 @@ app.use((req, res, next) => {
 
 
 // 3. ROUTES
+app.use('/', viewRouter)
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter)
